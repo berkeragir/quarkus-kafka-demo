@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators.StringIdGenerator;
 
 import org.jboss.logmanager.Logger;
 import org.jboss.resteasy.annotations.SseElementType;
+import org.jboss.resteasy.resteasy_jaxrs.i18n.LogMessages_.logger;
 import org.reactivestreams.Publisher;
 
 import lombok.AllArgsConstructor;
@@ -47,10 +48,12 @@ public class RecordController {
 
     public RecordController() {
         try {
-            InputStream inputStream = getClass().getResourceAsStream("resources/data/random.json");
+            InputStream inputStream = getClass().getResourceAsStream("/data/random.json");
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 this.randomPayload = reader.lines()
                         .collect(Collectors.joining(System.lineSeparator()));
+
+            logger.info("Will use the contents of random.json as payload:\n" + randomPayload);
 		} catch (Exception e) {
             e.printStackTrace();
         
