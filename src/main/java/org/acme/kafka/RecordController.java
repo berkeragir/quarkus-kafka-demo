@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators.StringIdGenerator;
 
 import org.jboss.logmanager.Logger;
 import org.jboss.resteasy.annotations.SseElementType;
-import org.jboss.resteasy.resteasy_jaxrs.i18n.LogMessages_.logger;
 import org.reactivestreams.Publisher;
 
 import lombok.AllArgsConstructor;
