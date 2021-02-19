@@ -18,10 +18,10 @@ public class PriceGenerator {
     private Random random = new Random();
 
     @Outgoing("generated-price")
-    public Multi<Integer> generate() {
-        return Multi.createFrom().ticks().every(Duration.ofSeconds(5))
+    public Multi<MyRecord> generate() {
+        return Multi.createFrom().ticks().every(Duration.ofSeconds(1))
                 .onOverflow().drop()
-                .map(tick -> random.nextInt(100));
+                .map(tick -> new MyRecord("someId", "My Name", "{ 'payload': 'This is the payload, which is some json dict' }", "This is a kafka object with a message! Hey. I also have some random number.", random.nextInt(10000)));
     }
 
 }

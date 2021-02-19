@@ -24,8 +24,11 @@ public class PriceConverter {
     @Broadcast
     // Acknowledge the messages before calling this method.
     @Acknowledgment(Acknowledgment.Strategy.PRE_PROCESSING)
-    public double process(int priceInUsd) {
-        return priceInUsd * CONVERSION_RATE;
+    public MyRecord process(MyRecord myRecord) {
+        
+        myRecord.setMyNumber((int) (myRecord.getMyNumber() * CONVERSION_RATE));
+
+        return myRecord;
     }
 
 }

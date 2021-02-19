@@ -19,13 +19,13 @@ public class PriceResource {
 
     @Inject
     @Channel("my-data-stream")
-    Publisher<Double> prices;
+    Publisher<MyRecord> records;
 
     @GET
     @Path("/stream")
     @Produces(MediaType.SERVER_SENT_EVENTS) // denotes that server side events (SSE) will be produced
-    @SseElementType("text/plain") // denotes that the contained data, within this SSE, is just regular text/plain data
-    public Publisher<Double> stream() {
-        return prices;
+    @SseElementType(MediaType.APPLICATION_JSON) // denotes that the contained data, within this SSE, is just regular text/plain data
+    public Publisher<MyRecord> stream() {
+        return records;
     }
 }
