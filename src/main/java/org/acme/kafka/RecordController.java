@@ -41,7 +41,7 @@ public class RecordController {
 
     private Random random = new Random();
 
-    final MyCounters myCounters = new MyCounters(0, 0);
+    final MyCounters myCounters = new MyCounters(0, 0, 0, 0);
 
     private String randomPayload;
 
@@ -109,7 +109,10 @@ public class RecordController {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getCurrentCounters() {
-        return String.format("{ \n\t\"successful\": %d,\n\t\"failed\": %d\n}", myCounters.getProcessedMessages(), myCounters.getFailedMessages());
+        String response = String.format("successful: %d,\tfailed: %d\ttotal_successful: %d,\ttotal_failed: %d\n", 
+            myCounters.getProcessedMessages(), myCounters.getFailedMessages(), myCounters.getTotalProcessed(), myCounters.getTotalFailed());
+        myCounters.reset();
+        return response;
     }
 
     @Data
@@ -118,14 +121,24 @@ public class RecordController {
         private int processedMessages;
         private int failedMessages;
 
+        private int totalProcessed = 0;
+        private int totalFailed = 0;
+
         @Synchronized
         public void incrementProcessedMessages() {
             this.processedMessages++;
+            this.totalProcessed++;
         }
 
         @Synchronized
         public void incrementFailedMessages() {
             this.failedMessages++;
+            this.totalFailed++;
+        }
+
+        public void reset() {
+            this.processedMessages = 0;
+            this.failedMessages = 0;
         }
     }    
 }
