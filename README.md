@@ -1,7 +1,9 @@
 Quarkus Kafka Quickstart
 ========================
 
-This project illustrates how you can interact with Apache Kafka using MicroProfile Reactive Messaging.
+Demo Kafka producer application.
+
+Uses MicroProfile Reactive Messaging library as the client.
 
 ## Kafka cluster
 
@@ -15,26 +17,26 @@ The application can be started using:
 mvn quarkus:dev
 ```
 
-Then, open your browser to `http://localhost:8080/prices.html`, and you should see a fluctuating price.
+## Endpoints
 
-## Anatomy
+`GET /records`: To see the amount of successful and failed messages processed since the last request made to this endpoint. Can be called every second to get a rough idea on performance.
 
-In addition to the `prices.html` page, the application is composed by 3 components:
+`POST /records -d "num=$number" -d "payload=$data"`: Trigger sending messages in bulk to kafka where `$number` is the amount of messages you would like to send, and the `$data` is the payload you would to include in these messages. `$data` is optional. If left empty, some other random data of a relatively big size (i.e. ~18kb) will be sent.
 
-* `PriceGenerator` - a bean generating random price. They are sent to a Kafka topic
-* `PriceConverter` - on the consuming side, the `PriceConverter` receives the Kafka message and convert the price.
-The result is sent to an in-memory stream of data
-* `PriceResource`  - the `PriceResource` retrieves the in-memory stream of data in which the converted prices are sent and send these prices to the browser using Server-Sent Events.
+### Example
 
-The interaction with Kafka is managed by MicroProfile Reactive Messaging.
-The configuration is located in the application configuration.
+Wathcing the processed data every second:
+```bash
+while sleep 1; do curl http://localhost:8080/records; done
+```
 
-## Running in native
+Send 100,000 messages:
+```bash
+curl http://localhost:8080/records -X POST -d "num=100000"
+```
 
-You can compile the application into a native binary using:
-
-`mvn clean install -Pnative`
-
-and run with:
-
-`./target/kafka-quickstart-1.0.0-SNAPSHOT-runner` 
+Send 100,000 messages with user-provided data:
+```bash
+export MYVAR=<YOUR_DATA_HERE>
+curl http://localhost:8080/records -X POST -d "num=100000" -d "payload=$MYVAR"
+```
