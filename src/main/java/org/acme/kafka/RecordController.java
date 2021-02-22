@@ -23,6 +23,7 @@ import org.jboss.logmanager.Logger;
 import org.jboss.resteasy.annotations.SseElementType;
 import org.reactivestreams.Publisher;
 
+import jdk.internal.org.jline.utils.Log;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Synchronized;
@@ -47,6 +48,9 @@ public class RecordController {
 
     public RecordController() {
         try {
+
+            // Load the included random payload to be used by default in messages.
+
             InputStream inputStream = getClass().getResourceAsStream("/data/random.json");
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 this.randomPayload = reader.lines()
@@ -62,7 +66,7 @@ public class RecordController {
     }
     
     @Inject 
-    @Channel("generated-price") 
+    @Channel("my-record-topic") 
     @OnOverflow(value = OnOverflow.Strategy.UNBOUNDED_BUFFER)
     Emitter<MyRecord> recordEmitter;
 
@@ -80,8 +84,11 @@ public class RecordController {
         return records;
     }
 
+    /* 
+     * Endpoint for triggering new messages for kafka
+     */
     @POST
-    public void sendNewRecords(@FormParam("num") int num) {
+    public void sendNewRecords(@FormParam("num") int num, @FormParam("payload") String jsonPayload) {
         // Send #num new messages to kafka
 
         logger.info(String.format("New request send %d messages to kafka...", num));
@@ -91,9 +98,18 @@ public class RecordController {
         myCounters.setProcessedMessages(0);
         myCounters.setFailedMessages(0);
 
+        String dataToSend = randomPayload;
+
+        if(jsonPayload != null) {
+            dataToSend = jsonPayload;
+
+            logger.info("Using the provided data in the request as the message payload:");
+            logger.info(dataToSend);
+        }
+
         for(i=0; i<num; i++) {
             recordEmitter
-                .send(new MyRecord("someId", "My Name", randomPayload, "This is a kafka object with a message! Hey. I also have some random number.", random.nextInt(10000)))
+                .send(new MyRecord("someId", "My Name", dataToSend, "This is a kafka object with a message! Hey. I also have some random number.", random.nextInt(10000)))
                 .whenComplete((success, failure) -> {
                     if (failure != null) {
                         myCounters.incrementFailedMessages();
@@ -106,14 +122,19 @@ public class RecordController {
         logger.info(String.format("Finished with %d successful, %d failed message processing.", myCounters.getProcessedMessages(), myCounters.getFailedMessages()));
     }
 
+    /* 
+     * Endpoint for getting the # of successful and failed message submissions since last request.
+     */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getCurrentCounters() {
         String response = String.format("successful: %d,\tfailed: %d\ttotal_successful: %d,\ttotal_failed: %d\n", 
             myCounters.getProcessedMessages(), myCounters.getFailedMessages(), myCounters.getTotalProcessed(), myCounters.getTotalFailed());
         myCounters.reset();
+
         return response;
     }
+
 
     @Data
     @AllArgsConstructor
