@@ -1,11 +1,8 @@
 package org.acme.kafka;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -17,13 +14,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.annotation.ObjectIdGenerators.StringIdGenerator;
 
 import org.jboss.logmanager.Logger;
 import org.jboss.resteasy.annotations.SseElementType;
 import org.reactivestreams.Publisher;
 
-import jdk.internal.org.jline.utils.Log;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Synchronized;
