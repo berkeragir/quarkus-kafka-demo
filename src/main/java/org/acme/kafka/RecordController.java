@@ -3,10 +3,13 @@ package org.acme.kafka;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -14,12 +17,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
 
 import org.jboss.logmanager.Logger;
 import org.jboss.resteasy.annotations.SseElementType;
 import org.reactivestreams.Publisher;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Data;
 import lombok.Synchronized;
 
@@ -66,45 +71,45 @@ public class RecordController {
     Emitter<MyRecord> recordEmitter;
 
 
-    @Inject
-    @Channel("my-data-stream")
-    Publisher<MyRecord> records;
+    // @Inject
+    // @Channel("my-data-stream")
+    // Publisher<MyRecord> records;
 
 
-    @GET
-    @Path("/stream")
-    @Produces(MediaType.SERVER_SENT_EVENTS) // denotes that server side events (SSE) will be produced
-    @SseElementType(MediaType.APPLICATION_JSON) // denotes that the contained data, within this SSE, is just regular text/plain data
-    public Publisher<MyRecord> stream() {
-        return records;
-    }
+    // @GET
+    // @Path("/stream")
+    // @Produces(MediaType.SERVER_SENT_EVENTS) // denotes that server side events (SSE) will be produced
+    // @SseElementType(MediaType.APPLICATION_JSON) // denotes that the contained data, within this SSE, is just regular text/plain data
+    // public Publisher<MyRecord> stream() {
+    //     return records;
+    // }
 
     /* 
      * Endpoint for triggering new messages for kafka
      */
     @POST
-    public void sendNewRecords(@FormParam("num") int num, @FormParam("payload") String jsonPayload) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void sendNewRecords(SendPayloadRequest request) {
         // Send #num new messages to kafka
 
-        logger.info(String.format("New request send %d messages to kafka...", num));
+        int numberOfMessages = request.getNum();
+
+        logger.info(String.format("New request send %d messages to kafka...", numberOfMessages));
 
         int i = 0;
 
-        myCounters.setProcessedMessages(0);
-        myCounters.setFailedMessages(0);
-
         String dataToSend = randomPayload;
 
-        if(jsonPayload != null) {
-            dataToSend = jsonPayload;
+        if(request.getPayload() != null) {
+            dataToSend = request.getPayload().toString();
 
-            logger.info("Using the provided data in the request as the message payload:");
-            logger.info(dataToSend);
+            // logger.info("Using the provided data in the request as the message payload:");
+            // logger.info(dataToSend);
         }
 
-        for(i=0; i<num; i++) {
+        for(i=0; i < numberOfMessages; i++) {
             recordEmitter
-                .send(new MyRecord("someId", "My Name", dataToSend, "This is a kafka object with a message! Hey. I also have some random number.", random.nextInt(10000)))
+                .send(new MyRecord("someId", dataToSend, random.nextInt(10000)))
                 .whenComplete((success, failure) -> {
                     if (failure != null) {
                         myCounters.incrementFailedMessages();
@@ -123,7 +128,7 @@ public class RecordController {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getCurrentCounters() {
-        String response = String.format("successful: %d,\tfailed: %d\ttotal_successful: %d,\ttotal_failed: %d\n", 
+        String response = String.format("%d,%d,%d,%d\n", 
             myCounters.getProcessedMessages(), myCounters.getFailedMessages(), myCounters.getTotalProcessed(), myCounters.getTotalFailed());
         myCounters.reset();
 
@@ -157,4 +162,12 @@ public class RecordController {
             this.failedMessages = 0;
         }
     }    
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SendPayloadRequest {
+        private int num;
+        private Map<String, Object> payload;
+    }
 }

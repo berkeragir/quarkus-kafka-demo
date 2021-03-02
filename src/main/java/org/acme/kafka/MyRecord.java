@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MyRecord {
     private String id;
-    private String name;
+    // private String name;
     private String payload;
-    private String message;
+    // private String message;
     private int myNumber;
 }
