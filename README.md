@@ -21,7 +21,7 @@ mvn quarkus:dev
 
 `GET /records`: To see the amount of successful and failed messages processed since the last request made to this endpoint. Can be called every second to get a rough idea on performance.
 
-`POST /records -d "num=$number" -d "payload=$data"`: Trigger sending messages in bulk to kafka where `$number` is the amount of messages you would like to send, and the `$data` is the payload you would to include in these messages. `$data` is optional. If left empty, some other random data of a relatively big size (i.e. ~18kb) will be sent.
+`POST /records -d "{ \"num\": \"1000\", \"payload\": $data }"`: Trigger sending messages in bulk to kafka where `$number` is the amount of messages you would like to send, and the `$data` is the payload you would to include in these messages (in *JSON* format). `$data` is optional. If left empty, some other random data of a relatively big size (i.e. ~18kb) will be sent.
 
 ### Example
 
@@ -38,5 +38,5 @@ curl http://localhost:8080/records -X POST -d "num=100000"
 Send 100,000 messages with user-provided data:
 ```bash
 export MYVAR=<YOUR_DATA_HERE>
-curl http://localhost:8080/records -X POST -d "num=100000" -d "payload=$MYVAR"
+curl http://localhost:8080/records -X POST -d "{ \"num\": \"1000\", \"payload\": $MYVAR }"
 ```
