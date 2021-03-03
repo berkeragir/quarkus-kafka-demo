@@ -32,7 +32,7 @@ while sleep 1; do curl http://localhost:8080/records; done
 
 Send 100,000 messages:
 ```bash
-curl http://localhost:8080/records -X POST -d "num=100000"
+curl http://localhost:8080/records -X POST -d "num=100000" -H "Content-Type: application/json"
 ```
 
 Send 100,000 messages with user-provided data:
