@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,6 +24,7 @@ import org.jboss.logmanager.Logger;
 import org.jboss.resteasy.annotations.SseElementType;
 import org.reactivestreams.Publisher;
 
+import jdk.internal.org.jline.utils.Log;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
@@ -67,7 +69,7 @@ public class RecordController {
     
     @Inject 
     @Channel("my-record-topic") 
-    @OnOverflow(value = OnOverflow.Strategy.UNBOUNDED_BUFFER)
+    @OnOverflow(value = OnOverflow.Strategy.NONE)
     Emitter<MyRecord> recordEmitter;
 
 
@@ -108,6 +110,7 @@ public class RecordController {
         }
 
         for(i=0; i < numberOfMessages; i++) {
+            try {
             recordEmitter
                 .send(new MyRecord("someId", dataToSend, random.nextInt(10000)))
                 .whenComplete((success, failure) -> {
@@ -117,6 +120,10 @@ public class RecordController {
                         myCounters.incrementProcessedMessages();
                     }
                 });
+            }
+            catch(Exception e) {
+                logger.log(Level.SEVERE, e.getMessage());
+            }
         }
 
         logger.info(String.format("Finished with %d successful, %d failed message processing.", myCounters.getProcessedMessages(), myCounters.getFailedMessages()));
