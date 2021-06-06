@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  application.properties: |-
+    quarkus.http.port=8080
+    mp.messaging.outgoing.my-record-topic.batch_size=262144
+    mp.messaging.outgoing.my-record-topic.linger_ms=10
+    mp.messaging.outgoing.my-record-topic.acks=1
+    mp.messaging.outgoing.my-record-topic.compression_type=snappy
+    kafka.bootstrap.servers=my-kafka-instance-kafka-bootstrap.kafka-cluster.svc:9092
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: kafka-client-demo
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: kafka-demo-client
+    app.openshift.io/runtime: quarkus
+    helm.sh/chart: quarkus
+  name: kafka-demo-client
+  namespace: kafka-performance-test

@@ -1,7 +1,7 @@
-Quarkus Kafka Quickstart
-========================
+Quarkus Kafka Producer Demo
+===========================
 
-Demo Kafka producer application.
+A demo Kafka producer application.
 
 Uses MicroProfile Reactive Messaging library as the client.
 

@@ -1,0 +1,40 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  labels:
+    prometheus: prometheus
+  name: prometheus
+  namespace: application-monitoring
+spec:
+  podMonitorSelector:
+    matchLabels:
+      monitor: 'true'
+  replicas: 2
+  scrapeInterval: 3s
+  serviceAccountName: prometheus
+  ruleNamespaceSelector:
+    matchLabels:
+      monitor: 'true'
+  serviceMonitorNamespaceSelector:
+    matchLabels:
+      prometheus: scrape
+  serviceMonitorSelector:
+    matchLabels:
+      monitor: 'true'
+  volumes:
+    - name: perst-volume
+      persistentVolumeClaim:
+        claimName: persistent-prometheus
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: persistent-prometheus
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: gp2
+  volumeMode: Filesystem
