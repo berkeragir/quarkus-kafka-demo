@@ -38,5 +38,5 @@ curl http://localhost:8080/records -X POST -d "num=100000" -H "Content-Type: app
 Send 100,000 messages with user-provided data:
 ```bash
 export MYVAR=<YOUR_DATA_HERE>
-curl http://localhost:8080/records -X POST -d "{ \"num\": \"1000\", \"payload\": $MYVAR }" -H "Content-Type: application/json"
+curl http://localhost:8080/records -X POST -d "{ \"num\": \"100000\", \"payload\": $MYVAR }" -H "Content-Type: application/json"
 ```
