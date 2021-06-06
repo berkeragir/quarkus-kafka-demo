@@ -1,0 +1,68 @@
+build:
+  contextDir: .
+  enabled: true
+  env:
+  - name: ARTIFACT_COPY_ARGS
+    value: "*-runner.jar"
+  jvm:
+    imageStreamTag:
+      name: openjdk-11-rhel7:1.1
+      namespace: kafka-performance-test
+      useReleaseNamespace: false
+  mode: jvm
+  native:
+    dockerfilePath: Dockerfile
+    useDefaultDockerfile: true
+  output:
+    kind: ImageStreamTag
+    pushSecret: null
+  ref: main
+  resources: null
+  uri: https://github.com/berkeragir/quarkus-kafka-demo.git
+deploy:
+  applicationProperties:
+    enabled: true
+    mountPath: /deployments/config/
+    properties: |-
+      quarkus.http.port=8080
+
+      kafka.bootstrap.servers=my-kafka-instance-kafka-bootstrap.kafka-cluster.svc:9092
+
+  env: null
+  envFrom: null
+  extraContainers: null
+  initContainers: null
+  livenessProbe:
+    tcpSocket:
+      port: http
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+  replicas: 1
+  resources:
+    requests:
+      cpu: 1
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 512Mi
+  route:
+    enabled: true
+    targetPort: http
+    tls:
+      enabled: true
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+  serviceType: ClusterIP
+  volumeMounts: null
+  volumes: null
+global:
+  nameOverride: kafka-demo-client
+image:
+  tag: latest
